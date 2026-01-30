@@ -26,6 +26,7 @@ const HeroBackground: React.FC = () => {
   const rafRef = useRef<number | null>(null);
   const flowsRef = useRef<any[]>([]);
   const popsRef = useRef<any[]>([]);
+  const stagesRef = useRef<Stage[] | null>(null);
   const [stages, setStages] = useState<Stage[]>([]);
   const [tooltip, setTooltip] = useState<{ visible: boolean; x: number; y: number; label?: string; desc?: string }>({ visible: false, x: 0, y: 0 });
 
@@ -36,6 +37,21 @@ const HeroBackground: React.FC = () => {
     const canvas = canvasRef.current!;
     const ctx = canvas.getContext("2d")!;
     let dpr = window.devicePixelRatio || 1;
+
+    const stagesEqual = (a: Stage[] | null, b: Stage[]) => {
+      if (!a) return false;
+      if (a.length !== b.length) return false;
+      for (let i = 0; i < a.length; i++) {
+        const aa = a[i];
+        const bb = b[i];
+        if (aa.id !== bb.id) return false;
+        if (Math.abs(aa.x - bb.x) > 1) return false;
+        if (Math.abs(aa.y - bb.y) > 1) return false;
+        if (Math.abs(aa.w - bb.w) > 1) return false;
+        if (Math.abs(aa.h - bb.h) > 1) return false;
+      }
+      return true;
+    };
 
     const resize = () => {
       dpr = window.devicePixelRatio || 1;
@@ -54,10 +70,13 @@ const HeroBackground: React.FC = () => {
         w: Math.max(80, Math.min(160, Math.floor(w / (STAGES.length * 2.6)))),
         h: 44,
       }));
-      setStages(newStages);
 
-      // rebuild flows when resized/positions change
-      initFlows(newStages);
+      // only update when positions actually change to avoid constant re-renders
+      if (!stagesEqual(stagesRef.current, newStages)) {
+        stagesRef.current = newStages;
+        setStages(newStages);
+        initFlows(newStages);
+      }
     };
 
     resize();
