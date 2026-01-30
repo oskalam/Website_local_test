@@ -30,6 +30,7 @@ const HeroBackground: React.FC = () => {
   const [stages, setStages] = useState<Stage[]>([]);
   const [initError, setInitError] = useState(false);
   const [tooltip, setTooltip] = useState<{ visible: boolean; x: number; y: number; label?: string; desc?: string }>({ visible: false, x: 0, y: 0 });
+  const [debugStatus, setDebugStatus] = useState({ canvas: false, flows: 0, stages: 0, reduced: false, initError: false });
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -42,14 +43,17 @@ const HeroBackground: React.FC = () => {
       if (!ctx) {
         console.error("HeroBackground: 2D context unavailable");
         setInitError(true);
+        setDebugStatus((s) => ({ ...s, initError: true }));
         return;
       }
     } catch (e) {
       console.error("HeroBackground init failed", e);
       setInitError(true);
+      setDebugStatus((s) => ({ ...s, initError: true }));
       return;
     }
     let dpr = window.devicePixelRatio || 1;
+    setDebugStatus((s) => ({ ...s, canvas: true, reduced: prefersReduced }));
 
     const stagesEqual = (a: Stage[] | null, b: Stage[]) => {
       if (!a) return false;
@@ -120,6 +124,8 @@ const HeroBackground: React.FC = () => {
           });
         }
       }
+      // update debug counts
+      setDebugStatus((s) => ({ ...s, flows: flowsRef.current.length, stages: localStages.length }));
     };
 
     initFlows(stages);
@@ -204,84 +210,96 @@ const HeroBackground: React.FC = () => {
     const pointOnCubic = (path: number[], t: number) => ({ x: cubicAt(path[0], path[2], path[4], path[6], t), y: cubicAt(path[1], path[3], path[5], path[7], t) });
 
     const step = (time = 0) => {
-      ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
+      try {
+        ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
 
-      // subtle background
-      ctx.fillStyle = "rgba(255,255,255,0.01)";
-      ctx.fillRect(0, 0, canvas.clientWidth, canvas.clientHeight);
+        // subtle background
+        ctx.fillStyle = "rgba(255,255,255,0.01)";
+        ctx.fillRect(0, 0, canvas.clientWidth, canvas.clientHeight);
 
-      // draw pipelines
-      for (let i = 0; i < stages.length - 1; i++) {
-        const a = stages[i];
-        const b = stages[i + 1];
-        const cx1 = a.x + (b.x - a.x) * 0.33;
-        const cy1 = a.y - 34;
-        const cx2 = a.x + (b.x - a.x) * 0.66;
-        const cy2 = b.y + 34;
+        // draw pipelines
+        for (let i = 0; i < stages.length - 1; i++) {
+          const a = stages[i];
+          const b = stages[i + 1];
+          const cx1 = a.x + (b.x - a.x) * 0.33;
+          const cy1 = a.y - 34;
+          const cx2 = a.x + (b.x - a.x) * 0.66;
+          const cy2 = b.y + 34;
 
-        ctx.beginPath();
-        ctx.moveTo(a.x, a.y);
-        ctx.bezierCurveTo(cx1, cy1, cx2, cy2, b.x, b.y);
-        ctx.lineWidth = 2.6;
-        ctx.strokeStyle = "rgba(60,120,180,0.12)";
-        ctx.stroke();
-      }
-
-      // flow particles
-      if (!prefersReduced) {
-        const now = performance.now();
-        for (let i = 0; i < flowsRef.current.length; i++) {
-          const f = flowsRef.current[i];
-
-          // respawn popped flows after delay
-          if (f.popped) {
-            if (now - (f.deadAt || 0) > POP_RESPAWN_MS) {
-              f.popped = false;
-              f.t = 0;
-              f.speed = 0.00035 + Math.random() * 0.0008;
-            } else continue;
-          }
-
-          f.t += f.speed * (1 + Math.sin(time * 0.001 + f.linkIdx));
-          if (f.t > 1) f.t = 0;
-
-          const pos = pointOnCubic(f.path, f.t);
           ctx.beginPath();
-          ctx.fillStyle = f.color;
-          ctx.globalAlpha = 0.98;
-          ctx.arc(pos.x, pos.y, f.size, 0, Math.PI * 2);
-          ctx.fill();
-        }
-
-        // pop visuals
-        for (let i = popsRef.current.length - 1; i >= 0; i--) {
-          const p = popsRef.current[i];
-          const age = now - p.start;
-          if (age > 520) { popsRef.current.splice(i, 1); continue; }
-          const prog = age / 520;
-          ctx.beginPath();
-          ctx.strokeStyle = `rgba(255,255,255,${1 - prog})`;
-          ctx.lineWidth = 1.2;
-          ctx.arc(p.x, p.y, p.r + prog * 18, 0, Math.PI * 2);
+          ctx.moveTo(a.x, a.y);
+          ctx.bezierCurveTo(cx1, cy1, cx2, cy2, b.x, b.y);
+          ctx.lineWidth = 2.6;
+          ctx.strokeStyle = "rgba(60,120,180,0.12)";
           ctx.stroke();
         }
 
-        ctx.globalAlpha = 1;
-      }
+        // flow particles
+        if (!prefersReduced) {
+          const now = performance.now();
+          for (let i = 0; i < flowsRef.current.length; i++) {
+            const f = flowsRef.current[i];
 
-      // draw stage boxes on top
-      for (let s of stages) {
-        ctx.beginPath(); ctx.fillStyle = "rgba(10,20,30,0.06)"; roundRect(ctx, s.x - s.w / 2 + 2, s.y - s.h / 2 + 6, s.w, s.h, 10); ctx.fill();
-        ctx.beginPath(); ctx.fillStyle = s.color; roundRect(ctx, s.x - s.w / 2, s.y - s.h / 2, s.w, s.h, 10); ctx.fill();
-        ctx.fillStyle = "white"; ctx.font = "500 14px Inter, ui-sans-serif, system-ui"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(s.label, s.x, s.y);
-      }
+            // respawn popped flows after delay
+            if (f.popped) {
+              if (now - (f.deadAt || 0) > POP_RESPAWN_MS) {
+                f.popped = false;
+                f.t = 0;
+                f.speed = 0.00035 + Math.random() * 0.0008;
+              } else continue;
+            }
 
-      // hover halo
-      if (tooltip.visible && tooltip.label) {
-        ctx.beginPath(); ctx.fillStyle = "rgba(0,0,0,0.04)"; ctx.arc(tooltip.x, tooltip.y + 10, 52, 0, Math.PI * 2); ctx.fill();
-      }
+            f.t += f.speed * (1 + Math.sin(time * 0.001 + f.linkIdx));
+            if (f.t > 1) f.t = 0;
 
-      rafRef.current = requestAnimationFrame(step);
+            const pos = pointOnCubic(f.path, f.t);
+            ctx.beginPath();
+            ctx.fillStyle = f.color;
+            ctx.globalAlpha = 0.98;
+            ctx.arc(pos.x, pos.y, f.size, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          // pop visuals
+          for (let i = popsRef.current.length - 1; i >= 0; i--) {
+            const p = popsRef.current[i];
+            const age = now - p.start;
+            if (age > 520) { popsRef.current.splice(i, 1); continue; }
+            const prog = age / 520;
+            ctx.beginPath();
+            ctx.strokeStyle = `rgba(255,255,255,${1 - prog})`;
+            ctx.lineWidth = 1.2;
+            ctx.arc(p.x, p.y, p.r + prog * 18, 0, Math.PI * 2);
+            ctx.stroke();
+          }
+
+          ctx.globalAlpha = 1;
+        }
+
+        // draw stage boxes on top
+        for (let s of stages) {
+          ctx.beginPath(); ctx.fillStyle = "rgba(10,20,30,0.06)"; roundRect(ctx, s.x - s.w / 2 + 2, s.y - s.h / 2 + 6, s.w, s.h, 10); ctx.fill();
+          ctx.beginPath(); ctx.fillStyle = s.color; roundRect(ctx, s.x - s.w / 2, s.y - s.h / 2, s.w, s.h, 10); ctx.fill();
+          ctx.fillStyle = "white"; ctx.font = "500 14px Inter, ui-sans-serif, system-ui"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(s.label, s.x, s.y);
+        }
+
+        // hover halo
+        if (tooltip.visible && tooltip.label) {
+          ctx.beginPath(); ctx.fillStyle = "rgba(0,0,0,0.04)"; ctx.arc(tooltip.x, tooltip.y + 10, 52, 0, Math.PI * 2); ctx.fill();
+        }
+
+        // update debug counts periodically
+        if (performance.now() % 1000 < 60) {
+          setDebugStatus((s) => ({ ...s, flows: flowsRef.current.length, stages: stages.length }));
+        }
+
+        rafRef.current = requestAnimationFrame(step);
+      } catch (err) {
+        console.error("HeroBackground animation error", err);
+        setInitError(true);
+        setDebugStatus((s) => ({ ...s, initError: true }));
+        if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      }
     };
 
     function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
@@ -359,6 +377,15 @@ const HeroBackground: React.FC = () => {
           </svg>
         </div>
       )}
+
+      {/* debug overlay */}
+      <div className="pointer-events-none absolute top-4 right-4 z-30">
+        <div className="bg-black/65 text-white text-xs rounded-md px-3 py-2 backdrop-blur-sm">
+          <div>canvas: {debugStatus.canvas ? "ok" : "no"} {debugStatus.reduced ? " (reduced)" : ""}</div>
+          <div>flows: {debugStatus.flows} • stages: {debugStatus.stages}</div>
+          <div>initErr: {debugStatus.initError ? "yes" : "no"}</div>
+        </div>
+      </div>
 
       <div
         className="pointer-events-none absolute z-20"

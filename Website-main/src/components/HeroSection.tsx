@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ArrowDown } from "lucide-react";
-import HeroBackground from "@/components/HeroBackground";
+// import HeroBackground from "@/components/HeroBackground";
 const HeroSection = () => {
   const scrollToContact = () => {
     const element = document.querySelector("#contact");
