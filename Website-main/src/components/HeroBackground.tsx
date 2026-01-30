@@ -28,6 +28,7 @@ const HeroBackground: React.FC = () => {
   const popsRef = useRef<any[]>([]);
   const stagesRef = useRef<Stage[] | null>(null);
   const [stages, setStages] = useState<Stage[]>([]);
+  const [initError, setInitError] = useState(false);
   const [tooltip, setTooltip] = useState<{ visible: boolean; x: number; y: number; label?: string; desc?: string }>({ visible: false, x: 0, y: 0 });
 
   useEffect(() => {
@@ -35,7 +36,19 @@ const HeroBackground: React.FC = () => {
 
     const prefersReduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const canvas = canvasRef.current!;
-    const ctx = canvas.getContext("2d")!;
+    let ctx: CanvasRenderingContext2D | null = null;
+    try {
+      ctx = canvas.getContext("2d");
+      if (!ctx) {
+        console.error("HeroBackground: 2D context unavailable");
+        setInitError(true);
+        return;
+      }
+    } catch (e) {
+      console.error("HeroBackground init failed", e);
+      setInitError(true);
+      return;
+    }
     let dpr = window.devicePixelRatio || 1;
 
     const stagesEqual = (a: Stage[] | null, b: Stage[]) => {
@@ -290,6 +303,62 @@ const HeroBackground: React.FC = () => {
   return (
     <div className="absolute inset-0 w-full h-full pointer-events-auto" aria-hidden>
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
+
+      {initError && (
+        <div className="absolute inset-0 z-10 pointer-events-none">
+          <svg viewBox="0 0 1000 300" preserveAspectRatio="xMidYMid slice" className="w-full h-full">
+            <defs>
+              <filter id="soft" x="-50%" y="-50%" width="200%" height="200%">
+                <feDropShadow dx="0" dy="4" stdDeviation="8" floodColor="#0b1220" floodOpacity="0.06" />
+              </filter>
+            </defs>
+            {/* draw faint pipelines */}
+            {STAGES.slice(0, STAGES.length - 1).map((s, i) => {
+              const x0 = 200 + i * 200;
+              const x1 = 200 + (i + 1) * 200;
+              const y = 150;
+              const cx1 = x0 + (x1 - x0) * 0.33;
+              const cy1 = y - 34;
+              const cx2 = x0 + (x1 - x0) * 0.66;
+              const cy2 = y + 34;
+              const d = `M ${x0} ${y} C ${cx1} ${cy1} ${cx2} ${cy2} ${x1} ${y}`;
+              return (
+                <g key={i}>
+                  <path id={`p${i}`} d={d} fill="none" stroke="rgba(60,120,180,0.12)" strokeWidth="3" strokeLinecap="round" />
+                  <path d={d} fill="none" stroke="rgba(60,130,200,0.14)" strokeWidth="1.4" strokeLinecap="round" />
+
+                  {/* moving dots */}
+                  {new Array(6).fill(0).map((_, k) => (
+                    <circle key={k} r={3} fill={STAGES[i].color} className="opacity-90">
+                      <animateMotion
+                        dur={`${4 + (k * 0.18) + i * 0.3}s`}
+                        repeatCount="indefinite"
+                        keyTimes="0;1"
+                        values="0;1">
+                        <mpath href={`#p${i}`} />
+                      </animateMotion>
+                    </circle>
+                  ))}
+                </g>
+              );
+            })}
+
+            {/* stage boxes */}
+            {STAGES.map((s, i) => {
+              const x = 200 + i * 200;
+              const y = 150;
+              const w = 110;
+              const h = 44;
+              return (
+                <g key={s.id} transform={`translate(${x - w / 2}, ${y - h / 2})`} aria-hidden>
+                  <rect rx={10} width={w} height={h} fill={s.color} filter="url(#soft)" />
+                  <text x={w / 2} y={h / 2} alignmentBaseline="middle" textAnchor="middle" fontFamily="Inter, ui-sans-serif, system-ui" fontWeight={600} fontSize={14} fill="#fff">{s.label}</text>
+                </g>
+              );
+            })}
+          </svg>
+        </div>
+      )}
 
       <div
         className="pointer-events-none absolute z-20"
