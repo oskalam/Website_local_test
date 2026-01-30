@@ -24,8 +24,18 @@ const HeroSection = () => {
       background: "radial-gradient(ellipse 80% 50% at 50% -20%, hsl(175 35% 35% / 0.08), transparent)"
     }} />
       
-      {/* Animated interactive background */}
-      <HeroBackground />
+      {/* Animated interactive background (temporarily removed) */}
+      <div className="absolute inset-0 opacity-60" aria-hidden>
+        <svg className="w-full h-full" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice">
+          <defs>
+            <linearGradient id="g1" x1="0" x2="1">
+              <stop offset="0%" stopColor="#e6f6f6" />
+              <stop offset="100%" stopColor="#f8fafb" />
+            </linearGradient>
+          </defs>
+          <rect width="1200" height="700" fill="url(#g1)" />
+        </svg>
+      </div>
 
       {/* Geometric accent shapes */}
       <div className="absolute top-1/4 right-1/4 w-64 h-64 rounded-full bg-primary/5 blur-3xl animate-float" />
