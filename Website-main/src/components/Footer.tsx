@@ -14,7 +14,7 @@ const Footer = () => {
             />
             <div className="flex flex-col items-center md:items-start gap-0">
               <span className="text-lg font-bold text-foreground">Querit Oy</span>
-              <span className="text-sm font-semibold text-foreground">1234567-8</span>
+              <span className="text-sm font-semibold text-foreground">3594237-2</span>
             </div>
           </div>
           <p className="text-sm text-muted-foreground">
