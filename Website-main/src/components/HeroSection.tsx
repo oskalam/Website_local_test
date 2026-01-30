@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ArrowDown } from "lucide-react";
+import HeroBackground from "@/components/HeroBackground";
 const HeroSection = () => {
   const scrollToContact = () => {
     const element = document.querySelector("#contact");
@@ -23,6 +24,9 @@ const HeroSection = () => {
       background: "radial-gradient(ellipse 80% 50% at 50% -20%, hsl(175 35% 35% / 0.08), transparent)"
     }} />
       
+      {/* Animated interactive background */}
+      <HeroBackground />
+
       {/* Geometric accent shapes */}
       <div className="absolute top-1/4 right-1/4 w-64 h-64 rounded-full bg-primary/5 blur-3xl animate-float" />
       <div className="absolute bottom-1/3 left-1/4 w-48 h-48 rounded-full bg-accent/30 blur-2xl animate-float" style={{
