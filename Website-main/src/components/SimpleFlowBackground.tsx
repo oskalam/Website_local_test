@@ -198,6 +198,16 @@ const SimpleFlowBackground: React.FC = () => {
           );
         })}
       </svg>
+
+      {/* debug badge (dev only) */}
+      {import.meta.env.DEV && (
+        <div className="pointer-events-none absolute top-4 right-4 z-30">
+          <div className="bg-black/65 text-white text-xs rounded-md px-3 py-2 backdrop-blur-sm">
+            <div>flows: {debug.flows} • particles: {debug.particles}</div>
+            <div>running: {debug.running ? "yes" : "no"}</div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
