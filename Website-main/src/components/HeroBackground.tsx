@@ -18,11 +18,14 @@ const STAGES: Omit<Stage, "x" | "y" | "w" | "h">[] = [
   { id: "business", label: "Business", desc: "Value & deployment into business outcomes", color: "#ef4444" },
 ];
 
-const FLOW_PARTICLES = 18;
+const FLOW_PARTICLES = 22;
+const POP_RESPAWN_MS = 1200;
 
 const HeroBackground: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const rafRef = useRef<number | null>(null);
+  const flowsRef = useRef<any[]>([]);
+  const popsRef = useRef<any[]>([]);
   const [stages, setStages] = useState<Stage[]>([]);
   const [tooltip, setTooltip] = useState<{ visible: boolean; x: number; y: number; label?: string; desc?: string }>({ visible: false, x: 0, y: 0 });
 
@@ -47,46 +50,47 @@ const HeroBackground: React.FC = () => {
       const newStages: Stage[] = STAGES.map((s, i) => ({
         ...s,
         x: gap * (i + 1),
-        y: h * 0.5,
-        w: Math.max(90, Math.min(160, Math.floor(w / (STAGES.length * 2.4)))),
+        y: h * 0.52,
+        w: Math.max(80, Math.min(160, Math.floor(w / (STAGES.length * 2.6)))),
         h: 44,
       }));
       setStages(newStages);
+
+      // rebuild flows when resized/positions change
+      initFlows(newStages);
     };
 
     resize();
     window.addEventListener("resize", resize);
 
-    // prepare particle flows on each link
-    type Flow = { path: [number, number, number, number, number, number, number, number]; t: number; speed: number; size: number; color: string; linkIdx: number };
-    const flows: Flow[] = [];
+    type Flow = { path: [number, number, number, number, number, number, number, number]; t: number; speed: number; size: number; color: string; linkIdx: number; popped?: boolean; deadAt?: number };
 
-    const initFlows = () => {
-      flows.length = 0;
-      if (stages.length === 0) return;
-      for (let i = 0; i < stages.length - 1; i++) {
-        const a = stages[i];
-        const b = stages[i + 1];
-        // control points for a gentle curve
-        const cx1 = a.x + (b.x - a.x) * 0.35;
-        const cy1 = a.y - 40;
-        const cx2 = a.x + (b.x - a.x) * 0.65;
-        const cy2 = b.y + 40;
-        for (let p = 0; p < Math.ceil(FLOW_PARTICLES / (stages.length - 1)); p++) {
-          flows.push({
-            path: [a.x, a.y, cx1, cy1, cx2, cy2, b.x, b.y],
-            t: Math.random(),
-            speed: 0.0006 + Math.random() * 0.0011,
-            size: 2 + Math.random() * 1.6,
+    const initFlows = (localStages: Stage[]) => {
+      flowsRef.current = [];
+      if (localStages.length === 0) return;
+      for (let i = 0; i < localStages.length - 1; i++) {
+        const a = localStages[i];
+        const b = localStages[i + 1];
+        const cx1 = a.x + (b.x - a.x) * 0.36;
+        const cy1 = a.y - 34;
+        const cx2 = a.x + (b.x - a.x) * 0.64;
+        const cy2 = b.y + 34;
+        const count = Math.ceil(FLOW_PARTICLES / (localStages.length - 1));
+        for (let p = 0; p < count; p++) {
+          flowsRef.current.push({
+            path: [a.x, a.y, cx1, cy1, cx2, cy2, b.x, b.y] as any,
+            t: (p / count) * 0.9 + Math.random() * 0.1,
+            speed: 0.00035 + Math.random() * 0.0007,
+            size: 2 + Math.random() * 1.8,
             color: a.color,
             linkIdx: i,
+            popped: false,
           });
         }
       }
     };
 
-    // we need to init after stages are set; watch stages
-    initFlows();
+    initFlows(stages);
 
     let mouse = { x: -9999, y: -9999 };
 
@@ -106,14 +110,51 @@ const HeroBackground: React.FC = () => {
 
       if (found) setTooltip({ visible: true, x: found.x, y: found.y - found.h / 2 - 10, label: found.label, desc: found.desc });
       else setTooltip((t) => ({ ...t, visible: false }));
+
+      // pointer for particles
+      let overParticle = false;
+      for (let f of flowsRef.current) {
+        if (f.popped) continue;
+        const pos = pointOnCubic(f.path, f.t);
+        const dx = pos.x - mouse.x;
+        const dy = pos.y - mouse.y;
+        if (dx * dx + dy * dy < 12 * 12) {
+          overParticle = true;
+          break;
+        }
+      }
+      canvas.style.cursor = overParticle || found ? "pointer" : "default";
     };
 
     const onLeave = () => {
       mouse.x = -9999; mouse.y = -9999;
       setTooltip((t) => ({ ...t, visible: false }));
+      canvas.style.cursor = "default";
     };
 
     const onClick = () => {
+      // pop nearest particle within threshold
+      let nearest: { idx: number; dist: number; x: number; y: number } | null = null;
+      for (let i = 0; i < flowsRef.current.length; i++) {
+        const f = flowsRef.current[i];
+        if (f.popped) continue;
+        const pos = pointOnCubic(f.path, f.t);
+        const dx = pos.x - mouse.x;
+        const dy = pos.y - mouse.y;
+        const d2 = dx * dx + dy * dy;
+        if (d2 < 16 * 16 && (nearest === null || d2 < nearest.dist)) {
+          nearest = { idx: i, dist: d2, x: pos.x, y: pos.y };
+        }
+      }
+      if (nearest) {
+        // mark popped and add pop visual
+        const f = flowsRef.current[nearest.idx];
+        f.popped = true;
+        f.deadAt = performance.now();
+        popsRef.current.push({ x: nearest.x, y: nearest.y, start: performance.now(), r: 6 });
+      }
+
+      // also handle stage clicks
       for (let s of stages) {
         if (mouse.x >= s.x - s.w / 2 && mouse.x <= s.x + s.w / 2 && mouse.y >= s.y - s.h / 2 && mouse.y <= s.y + s.h / 2) {
           const target = document.getElementById(s.id);
@@ -128,22 +169,23 @@ const HeroBackground: React.FC = () => {
     canvas.addEventListener("click", onClick);
 
     const cubicAt = (p0: number, p1: number, p2: number, p3: number, t: number) => ((1 - t) ** 3) * p0 + 3 * ((1 - t) ** 2) * t * p1 + 3 * (1 - t) * (t ** 2) * p2 + (t ** 3) * p3;
+    const pointOnCubic = (path: number[], t: number) => ({ x: cubicAt(path[0], path[2], path[4], path[6], t), y: cubicAt(path[1], path[3], path[5], path[7], t) });
 
     const step = (time = 0) => {
       ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
 
-      // background subtle overlay
+      // subtle background
       ctx.fillStyle = "rgba(255,255,255,0.01)";
       ctx.fillRect(0, 0, canvas.clientWidth, canvas.clientHeight);
 
-      // draw links (curved pipelines)
+      // draw pipelines
       for (let i = 0; i < stages.length - 1; i++) {
         const a = stages[i];
         const b = stages[i + 1];
         const cx1 = a.x + (b.x - a.x) * 0.33;
-        const cy1 = a.y - 40;
+        const cy1 = a.y - 34;
         const cx2 = a.x + (b.x - a.x) * 0.66;
-        const cy2 = b.y + 40;
+        const cy2 = b.y + 34;
 
         ctx.beginPath();
         ctx.moveTo(a.x, a.y);
@@ -151,75 +193,68 @@ const HeroBackground: React.FC = () => {
         ctx.lineWidth = 2.6;
         ctx.strokeStyle = "rgba(60,120,180,0.12)";
         ctx.stroke();
-
-        // add a brighter inner line for depth
-        ctx.beginPath();
-        ctx.moveTo(a.x, a.y);
-        ctx.bezierCurveTo(cx1, cy1, cx2, cy2, b.x, b.y);
-        ctx.lineWidth = 1.4;
-        ctx.strokeStyle = "rgba(60,130,200,0.14)";
-        ctx.stroke();
       }
 
-      // draw flowing particles
+      // flow particles
       if (!prefersReduced) {
-        for (let f of flows) {
+        const now = performance.now();
+        for (let i = 0; i < flowsRef.current.length; i++) {
+          const f = flowsRef.current[i];
+
+          // respawn popped flows after delay
+          if (f.popped) {
+            if (now - (f.deadAt || 0) > POP_RESPAWN_MS) {
+              f.popped = false;
+              f.t = 0;
+              f.speed = 0.00035 + Math.random() * 0.0008;
+            } else continue;
+          }
+
           f.t += f.speed * (1 + Math.sin(time * 0.001 + f.linkIdx));
           if (f.t > 1) f.t = 0;
-          const [x0, y0, x1, y1, x2, y2, x3, y3] = f.path;
-          const x = cubicAt(x0, x1, x2, x3, f.t);
-          const y = cubicAt(y0, y1, y2, y3, f.t);
+
+          const pos = pointOnCubic(f.path, f.t);
           ctx.beginPath();
           ctx.fillStyle = f.color;
-          ctx.globalAlpha = 0.95;
-          ctx.arc(x, y, f.size, 0, Math.PI * 2);
+          ctx.globalAlpha = 0.98;
+          ctx.arc(pos.x, pos.y, f.size, 0, Math.PI * 2);
           ctx.fill();
         }
+
+        // pop visuals
+        for (let i = popsRef.current.length - 1; i >= 0; i--) {
+          const p = popsRef.current[i];
+          const age = now - p.start;
+          if (age > 520) { popsRef.current.splice(i, 1); continue; }
+          const prog = age / 520;
+          ctx.beginPath();
+          ctx.strokeStyle = `rgba(255,255,255,${1 - prog})`;
+          ctx.lineWidth = 1.2;
+          ctx.arc(p.x, p.y, p.r + prog * 18, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+
         ctx.globalAlpha = 1;
       }
 
-      // draw stage boxes
+      // draw stage boxes on top
       for (let s of stages) {
-        // shadow
-        ctx.beginPath();
-        ctx.fillStyle = "rgba(10,20,30,0.06)";
-        roundRect(ctx, s.x - s.w / 2 + 2, s.y - s.h / 2 + 6, s.w, s.h, 10);
-        ctx.fill();
-
-        // box
-        ctx.beginPath();
-        ctx.fillStyle = s.color;
-        roundRect(ctx, s.x - s.w / 2, s.y - s.h / 2, s.w, s.h, 10);
-        ctx.fill();
-
-        // label
-        ctx.fillStyle = "white";
-        ctx.font = "500 14px Inter, ui-sans-serif, system-ui";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText(s.label, s.x, s.y);
+        ctx.beginPath(); ctx.fillStyle = "rgba(10,20,30,0.06)"; roundRect(ctx, s.x - s.w / 2 + 2, s.y - s.h / 2 + 6, s.w, s.h, 10); ctx.fill();
+        ctx.beginPath(); ctx.fillStyle = s.color; roundRect(ctx, s.x - s.w / 2, s.y - s.h / 2, s.w, s.h, 10); ctx.fill();
+        ctx.fillStyle = "white"; ctx.font = "500 14px Inter, ui-sans-serif, system-ui"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(s.label, s.x, s.y);
       }
 
       // hover halo
       if (tooltip.visible && tooltip.label) {
-        ctx.beginPath();
-        ctx.fillStyle = "rgba(0,0,0,0.04)";
-        ctx.arc(tooltip.x, tooltip.y + 10, 52, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.beginPath(); ctx.fillStyle = "rgba(0,0,0,0.04)"; ctx.arc(tooltip.x, tooltip.y + 10, 52, 0, Math.PI * 2); ctx.fill();
       }
 
       rafRef.current = requestAnimationFrame(step);
     };
 
-    // helper: draw rounded rect path
     function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
-      const min = Math.min(w, h) / 2;
-      if (r > min) r = min;
-      ctx.moveTo(x + r, y);
-      ctx.arcTo(x + w, y, x + w, y + h, r);
-      ctx.arcTo(x + w, y + h, x, y + h, r);
-      ctx.arcTo(x, y + h, x, y, r);
-      ctx.arcTo(x, y, x + w, y, r);
+      const min = Math.min(w, h) / 2; if (r > min) r = min;
+      ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r);
     }
 
     rafRef.current = requestAnimationFrame(step);
@@ -233,7 +268,6 @@ const HeroBackground: React.FC = () => {
     };
   }, [stages]);
 
-  // Tooltip overlay
   return (
     <div className="absolute inset-0 w-full h-full pointer-events-auto" aria-hidden>
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
