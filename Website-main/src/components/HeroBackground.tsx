@@ -1,40 +1,29 @@
 import React, { useEffect, useRef, useState } from "react";
 
-type NodeItem = {
+type Stage = {
+  id: string;
+  label: string;
+  desc: string;
+  color: string;
   x: number;
   y: number;
-  vx: number;
-  vy: number;
-  size: number;
-  label: string;
-  color: string;
+  w: number;
+  h: number;
 };
 
-const DEFAULT_NODES = [
-  "Process",
-  "Data",
-  "Model",
-  "Automation",
-  "People",
-  "Strategy",
+const STAGES: Omit<Stage, "x" | "y" | "w" | "h">[] = [
+  { id: "process", label: "Process", desc: "Business processes & optimization", color: "#2563eb" },
+  { id: "data", label: "Data", desc: "Data engineering, analytics & pipelines", color: "#0ea5a4" },
+  { id: "model", label: "Model", desc: "ML models, evaluation & deployment", color: "#7c3aed" },
+  { id: "business", label: "Business", desc: "Value & deployment into business outcomes", color: "#ef4444" },
 ];
 
-const NODE_DESCRIPTIONS: Record<string, string> = {
-  Process: "Business processes & optimization",
-  Data: "Data engineering, analytics & pipelines",
-  Model: "ML models, evaluation & deployment",
-  Automation: "Automation, tooling & integration",
-  People: "Change management & training",
-  Strategy: "Product & AI strategy & governance",
-};
-
-const colors = ["#2563eb", "#0ea5a4", "#7c3aed", "#ef4444", "#0ea5a4", "#0369a1"];
-
-const HOVER_RADIUS = 44;
+const FLOW_PARTICLES = 18;
 
 const HeroBackground: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const rafRef = useRef<number | null>(null);
+  const [stages, setStages] = useState<Stage[]>([]);
   const [tooltip, setTooltip] = useState<{ visible: boolean; x: number; y: number; label?: string; desc?: string }>({ visible: false, x: 0, y: 0 });
 
   useEffect(() => {
@@ -50,25 +39,54 @@ const HeroBackground: React.FC = () => {
       canvas.width = Math.floor(canvas.clientWidth * dpr);
       canvas.height = Math.floor(canvas.clientHeight * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      // position stages in a horizontal layout centered vertically
+      const w = canvas.clientWidth;
+      const h = canvas.clientHeight;
+      const gap = w / (STAGES.length + 1);
+      const newStages: Stage[] = STAGES.map((s, i) => ({
+        ...s,
+        x: gap * (i + 1),
+        y: h * 0.5,
+        w: Math.max(90, Math.min(160, Math.floor(w / (STAGES.length * 2.4)))),
+        h: 44,
+      }));
+      setStages(newStages);
     };
 
     resize();
     window.addEventListener("resize", resize);
 
-    // build nodes in a loose circular layout
-    const nodes: NodeItem[] = [];
-    const w = canvas.clientWidth;
-    const h = canvas.clientHeight;
-    const cx = w / 2;
-    const cy = h / 2;
-    const radius = Math.min(w, h) * 0.28;
+    // prepare particle flows on each link
+    type Flow = { path: [number, number, number, number, number, number, number, number]; t: number; speed: number; size: number; color: string; linkIdx: number };
+    const flows: Flow[] = [];
 
-    for (let i = 0; i < DEFAULT_NODES.length; i++) {
-      const angle = (i / DEFAULT_NODES.length) * Math.PI * 2;
-      const x = cx + Math.cos(angle) * radius + (Math.random() - 0.5) * 40;
-      const y = cy + Math.sin(angle) * radius + (Math.random() - 0.5) * 40;
-      nodes.push({ x, y, vx: 0, vy: 0, size: 6 + Math.random() * 4, label: DEFAULT_NODES[i], color: colors[i % colors.length] });
-    }
+    const initFlows = () => {
+      flows.length = 0;
+      if (stages.length === 0) return;
+      for (let i = 0; i < stages.length - 1; i++) {
+        const a = stages[i];
+        const b = stages[i + 1];
+        // control points for a gentle curve
+        const cx1 = a.x + (b.x - a.x) * 0.35;
+        const cy1 = a.y - 40;
+        const cx2 = a.x + (b.x - a.x) * 0.65;
+        const cy2 = b.y + 40;
+        for (let p = 0; p < Math.ceil(FLOW_PARTICLES / (stages.length - 1)); p++) {
+          flows.push({
+            path: [a.x, a.y, cx1, cy1, cx2, cy2, b.x, b.y],
+            t: Math.random(),
+            speed: 0.0006 + Math.random() * 0.0011,
+            size: 2 + Math.random() * 1.6,
+            color: a.color,
+            linkIdx: i,
+          });
+        }
+      }
+    };
+
+    // we need to init after stages are set; watch stages
+    initFlows();
 
     let mouse = { x: -9999, y: -9999 };
 
@@ -77,23 +95,17 @@ const HeroBackground: React.FC = () => {
       mouse.x = e.clientX - rect.left;
       mouse.y = e.clientY - rect.top;
 
-      // detect hover
-      let found: NodeItem | null = null;
-      for (let n of nodes) {
-        const dx = n.x - mouse.x;
-        const dy = n.y - mouse.y;
-        const d2 = dx * dx + dy * dy;
-        if (d2 < HOVER_RADIUS * HOVER_RADIUS) {
-          found = n;
+      // detect hover over a stage rectangle
+      let found: Stage | null = null;
+      for (let s of stages) {
+        if (mouse.x >= s.x - s.w / 2 && mouse.x <= s.x + s.w / 2 && mouse.y >= s.y - s.h / 2 && mouse.y <= s.y + s.h / 2) {
+          found = s;
           break;
         }
       }
 
-      if (found) {
-        setTooltip({ visible: true, x: found.x, y: found.y - found.size - 8, label: found.label, desc: NODE_DESCRIPTIONS[found.label] });
-      } else {
-        setTooltip((t) => ({ ...t, visible: false }));
-      }
+      if (found) setTooltip({ visible: true, x: found.x, y: found.y - found.h / 2 - 10, label: found.label, desc: found.desc });
+      else setTooltip((t) => ({ ...t, visible: false }));
     };
 
     const onLeave = () => {
@@ -102,21 +114,11 @@ const HeroBackground: React.FC = () => {
     };
 
     const onClick = () => {
-      // click nearest node
-      let nearest: { node: NodeItem | null; dist: number } = { node: null, dist: Infinity };
-      for (let n of nodes) {
-        const dx = n.x - mouse.x;
-        const dy = n.y - mouse.y;
-        const d = Math.sqrt(dx * dx + dy * dy);
-        if (d < nearest.dist) {
-          nearest = { node: n, dist: d };
-        }
-      }
-      if (nearest.node && nearest.dist < HOVER_RADIUS) {
-        const id = nearest.node.label.toLowerCase();
-        const target = document.getElementById(id);
-        if (target) {
-          target.scrollIntoView({ behavior: "smooth" });
+      for (let s of stages) {
+        if (mouse.x >= s.x - s.w / 2 && mouse.x <= s.x + s.w / 2 && mouse.y >= s.y - s.h / 2 && mouse.y <= s.y + s.h / 2) {
+          const target = document.getElementById(s.id);
+          if (target) target.scrollIntoView({ behavior: "smooth" });
+          break;
         }
       }
     };
@@ -125,86 +127,100 @@ const HeroBackground: React.FC = () => {
     canvas.addEventListener("mouseleave", onLeave);
     canvas.addEventListener("click", onClick);
 
-    const step = () => {
+    const cubicAt = (p0: number, p1: number, p2: number, p3: number, t: number) => ((1 - t) ** 3) * p0 + 3 * ((1 - t) ** 2) * t * p1 + 3 * (1 - t) * (t ** 2) * p2 + (t ** 3) * p3;
+
+    const step = (time = 0) => {
       ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
 
-      // if reduced motion, draw a static subtle connection grid
-      if (prefersReduced) {
-        ctx.fillStyle = "rgba(0,0,0,0.02)";
-        ctx.fillRect(0, 0, canvas.clientWidth, canvas.clientHeight);
-        // draw small nodes
-        for (let n of nodes) {
+      // background subtle overlay
+      ctx.fillStyle = "rgba(255,255,255,0.01)";
+      ctx.fillRect(0, 0, canvas.clientWidth, canvas.clientHeight);
+
+      // draw links (curved pipelines)
+      for (let i = 0; i < stages.length - 1; i++) {
+        const a = stages[i];
+        const b = stages[i + 1];
+        const cx1 = a.x + (b.x - a.x) * 0.33;
+        const cy1 = a.y - 40;
+        const cx2 = a.x + (b.x - a.x) * 0.66;
+        const cy2 = b.y + 40;
+
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.bezierCurveTo(cx1, cy1, cx2, cy2, b.x, b.y);
+        ctx.lineWidth = 2.6;
+        ctx.strokeStyle = "rgba(60,120,180,0.12)";
+        ctx.stroke();
+
+        // add a brighter inner line for depth
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.bezierCurveTo(cx1, cy1, cx2, cy2, b.x, b.y);
+        ctx.lineWidth = 1.4;
+        ctx.strokeStyle = "rgba(60,130,200,0.14)";
+        ctx.stroke();
+      }
+
+      // draw flowing particles
+      if (!prefersReduced) {
+        for (let f of flows) {
+          f.t += f.speed * (1 + Math.sin(time * 0.001 + f.linkIdx));
+          if (f.t > 1) f.t = 0;
+          const [x0, y0, x1, y1, x2, y2, x3, y3] = f.path;
+          const x = cubicAt(x0, x1, x2, x3, f.t);
+          const y = cubicAt(y0, y1, y2, y3, f.t);
           ctx.beginPath();
-          ctx.fillStyle = n.color;
-          ctx.globalAlpha = 0.6;
-          ctx.arc(n.x, n.y, n.size, 0, Math.PI * 2);
+          ctx.fillStyle = f.color;
+          ctx.globalAlpha = 0.95;
+          ctx.arc(x, y, f.size, 0, Math.PI * 2);
           ctx.fill();
         }
         ctx.globalAlpha = 1;
-        return;
       }
 
-      // simple physics: gentle spring towards original positions + slight jitter
-      for (let n of nodes) {
-        // attraction to mouse when near
-        const dx = mouse.x - n.x;
-        const dy = mouse.y - n.y;
-        const d2 = dx * dx + dy * dy;
-        if (d2 < 20000) {
-          const f = 100 / (d2 + 200);
-          n.vx += dx * 0.0007 * f;
-          n.vy += dy * 0.0007 * f;
-        }
-
-        // small center spring to keep layout
-        const cxForce = (canvas.clientWidth / 2 - n.x) * 0.0002;
-        const cyForce = (canvas.clientHeight / 2 - n.y) * 0.0002;
-        n.vx += cxForce;
-        n.vy += cyForce;
-
-        n.vx *= 0.94;
-        n.vy *= 0.94;
-        n.x += n.vx;
-        n.y += n.vy;
-
-        // draw node
+      // draw stage boxes
+      for (let s of stages) {
+        // shadow
         ctx.beginPath();
-        ctx.fillStyle = n.color;
-        ctx.globalAlpha = 0.9;
-        ctx.arc(n.x, n.y, n.size, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(10,20,30,0.06)";
+        roundRect(ctx, s.x - s.w / 2 + 2, s.y - s.h / 2 + 6, s.w, s.h, 10);
         ctx.fill();
+
+        // box
+        ctx.beginPath();
+        ctx.fillStyle = s.color;
+        roundRect(ctx, s.x - s.w / 2, s.y - s.h / 2, s.w, s.h, 10);
+        ctx.fill();
+
+        // label
+        ctx.fillStyle = "white";
+        ctx.font = "500 14px Inter, ui-sans-serif, system-ui";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(s.label, s.x, s.y);
       }
 
-      // draw links based on distance
-      for (let i = 0; i < nodes.length; i++) {
-        for (let j = i + 1; j < nodes.length; j++) {
-          const a = nodes[i];
-          const b = nodes[j];
-          const dx = a.x - b.x;
-          const dy = a.y - b.y;
-          const d2 = dx * dx + dy * dy;
-          if (d2 < 15000) {
-            const alpha = Math.max(0.02, 0.12 - d2 / 20000);
-            ctx.beginPath();
-            ctx.strokeStyle = `rgba(60,120,180,${alpha})`;
-            ctx.lineWidth = 1;
-            ctx.moveTo(a.x, a.y);
-            ctx.lineTo(b.x, b.y);
-            ctx.stroke();
-          }
-        }
-      }
-
-      // draw hover halo
+      // hover halo
       if (tooltip.visible && tooltip.label) {
         ctx.beginPath();
-        ctx.fillStyle = "rgba(255,255,255,0.03)";
-        ctx.arc(tooltip.x, tooltip.y + 8, HOVER_RADIUS, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(0,0,0,0.04)";
+        ctx.arc(tooltip.x, tooltip.y + 10, 52, 0, Math.PI * 2);
         ctx.fill();
       }
 
       rafRef.current = requestAnimationFrame(step);
     };
+
+    // helper: draw rounded rect path
+    function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
+      const min = Math.min(w, h) / 2;
+      if (r > min) r = min;
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+    }
 
     rafRef.current = requestAnimationFrame(step);
 
@@ -215,13 +231,13 @@ const HeroBackground: React.FC = () => {
       canvas.removeEventListener("mouseleave", onLeave);
       canvas.removeEventListener("click", onClick);
     };
-  }, []);
+  }, [stages]);
 
+  // Tooltip overlay
   return (
     <div className="absolute inset-0 w-full h-full pointer-events-auto" aria-hidden>
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
 
-      {/* Tooltip overlay */}
       <div
         className="pointer-events-none absolute z-20"
         style={{ transform: `translate(-50%, -100%)`, left: tooltip.x || 0, top: tooltip.y || 0 }}
