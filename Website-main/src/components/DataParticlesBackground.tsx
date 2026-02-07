@@ -32,15 +32,19 @@ const DataParticlesBackground = () => {
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
-    // Initialize particles
-    const particleCount = 15;
+    // Determine particle count and speed based on screen size
+    const isMobile = window.innerWidth < 768;
+    const particleCount = isMobile ? 12 : 20;
+    const minSpeed = isMobile ? 0.8 : 1.2;
+    const maxSpeed = isMobile ? 1.3 : 2.0;
+
     particlesRef.current = Array.from({ length: particleCount }, () => {
       const baseY = Math.random() * canvas.height;
       return {
         x: Math.random() * canvas.width,
         y: baseY,
         baseY,
-        speed: 1.0 + Math.random() * 1.5,
+        speed: minSpeed + Math.random() * (maxSpeed - minSpeed),
         size: 4 + Math.random() * 6,
         opacity: 0.3 + Math.random() * 0.4,
         waveOffset: Math.random() * Math.PI * 2,

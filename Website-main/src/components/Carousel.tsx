@@ -41,13 +41,31 @@ const Carousel: React.FC = () => {
     const prev = useCallback(() => setCurrent((prev) => (prev === 0 ? length - 1 : prev - 1)), [length]);
     const next = useCallback(() => setCurrent((prev) => (prev === length - 1 ? 0 : prev + 1)), [length]);
 
-    // Auto-advance carousel every 15 seconds
+    // Auto-advance carousel with responsive intervals
     useEffect(() => {
-        const interval = setInterval(() => {
-            next();
-        }, 15000);
+        // Determine interval based on screen size
+        const getInterval = () => {
+            return window.innerWidth < 768 ? 12000 : 18000; // 12s mobile, 18s desktop
+        };
 
-        return () => clearInterval(interval);
+        let interval = setInterval(() => {
+            next();
+        }, getInterval());
+
+        // Update interval on window resize
+        const handleResize = () => {
+            clearInterval(interval);
+            interval = setInterval(() => {
+                next();
+            }, getInterval());
+        };
+
+        window.addEventListener('resize', handleResize);
+
+        return () => {
+            clearInterval(interval);
+            window.removeEventListener('resize', handleResize);
+        };
     }, [next]);
 
     return (
