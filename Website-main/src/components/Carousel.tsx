@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 
 const carouselItems = [
     {
@@ -40,6 +40,15 @@ const Carousel: React.FC = () => {
 
     const prev = useCallback(() => setCurrent((prev) => (prev === 0 ? length - 1 : prev - 1)), [length]);
     const next = useCallback(() => setCurrent((prev) => (prev === length - 1 ? 0 : prev + 1)), [length]);
+
+    // Auto-advance carousel every 15 seconds
+    useEffect(() => {
+        const interval = setInterval(() => {
+            next();
+        }, 15000);
+
+        return () => clearInterval(interval);
+    }, [next]);
 
     return (
         <div className="relative max-w-5xl mx-auto py-12 px-4">

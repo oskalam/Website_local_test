@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ArrowDown } from "lucide-react";
+import DataParticlesBackground from "@/components/DataParticlesBackground";
 const HeroSection = () => {
   const scrollToContact = () => {
     const element = document.querySelector("#contact");
@@ -22,6 +23,9 @@ const HeroSection = () => {
       <div className="absolute inset-0 opacity-60" style={{
       background: "radial-gradient(ellipse 80% 50% at 50% -20%, hsl(175 35% 35% / 0.08), transparent)"
     }} />
+      
+      {/* Data particles animation */}
+      <DataParticlesBackground />
       
       {/* Geometric accent shapes */}
       <div className="absolute top-1/4 right-1/4 w-64 h-64 rounded-full bg-primary/5 blur-3xl animate-float" />
