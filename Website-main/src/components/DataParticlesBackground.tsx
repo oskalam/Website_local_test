@@ -10,6 +10,7 @@ interface Particle {
   waveOffset: number;
   waveAmplitude: number;
   waveFrequency: number;
+  trail: { x: number; y: number }[];
 }
 
 const DataParticlesBackground = () => {
@@ -33,19 +34,20 @@ const DataParticlesBackground = () => {
     window.addEventListener('resize', resizeCanvas);
 
     // Initialize particles
-    const particleCount = 25;
+    const particleCount = 15;
     particlesRef.current = Array.from({ length: particleCount }, () => {
       const baseY = Math.random() * canvas.height;
       return {
         x: Math.random() * canvas.width,
         y: baseY,
         baseY,
-        speed: 0.3 + Math.random() * 0.7,
-        size: 3 + Math.random() * 5,
-        opacity: 0.2 + Math.random() * 0.4,
+        speed: 1.0 + Math.random() * 1.5,
+        size: 4 + Math.random() * 6,
+        opacity: 0.3 + Math.random() * 0.4,
         waveOffset: Math.random() * Math.PI * 2,
         waveAmplitude: 30 + Math.random() * 50,
         waveFrequency: 0.001 + Math.random() * 0.002,
+        trail: [],
       };
     });
 
@@ -61,11 +63,36 @@ const DataParticlesBackground = () => {
           Math.sin(particle.x * particle.waveFrequency + particle.waveOffset) * 
           particle.waveAmplitude;
 
+        // Add current position to trail
+        particle.trail.push({ x: particle.x, y: particle.y });
+        
+        // Keep only last 15 positions for trail effect
+        if (particle.trail.length > 15) {
+          particle.trail.shift();
+        }
+
         // Reset particle when it goes off screen
         if (particle.x > canvas.width + 20) {
           particle.x = -20;
           particle.baseY = Math.random() * canvas.height;
           particle.y = particle.baseY;
+          particle.trail = [];
+        }
+
+        // Draw trail (tube effect)
+        if (particle.trail.length > 1) {
+          ctx.beginPath();
+          ctx.moveTo(particle.trail[0].x, particle.trail[0].y);
+          
+          for (let i = 1; i < particle.trail.length; i++) {
+            ctx.lineTo(particle.trail[i].x, particle.trail[i].y);
+          }
+          
+          ctx.strokeStyle = `rgba(44, 82, 129, ${particle.opacity * 0.3})`;
+          ctx.lineWidth = particle.size * 0.6;
+          ctx.lineCap = 'round';
+          ctx.lineJoin = 'round';
+          ctx.stroke();
         }
 
         // Draw particle
