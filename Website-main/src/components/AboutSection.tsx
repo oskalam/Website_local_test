@@ -6,13 +6,13 @@ const AboutSection = () => {
       name: "Oskari Alamäki",
       title: "Co-founder & CFO",
       bio: "Expert in business process optimization and analytics. Background in CRM engineering with a focus on practical, scalable and sustainable solutions. MSc in Industrial Engineering and Management from LUT University.",
-      linkedin: "#https://www.linkedin.com/in/oskari-alam%C3%A4ki/",
+      linkedin: "https://www.linkedin.com/in/oskari-alam%C3%A4ki/",
     },
     {
       name: "Eemil Aspholm",
       title: "Co-founder & CTO",
       bio: "Expert in AI implementation and process automation. Previously led CRM related AI initiatives in Nordic companies. MSc in Industrial Engineering and Management from LUT University.",
-      linkedin: "#https://www.linkedin.com/in/eemil-aspholm/",
+      linkedin: "https://www.linkedin.com/in/eemil-aspholm/",
     },
   ];
 
