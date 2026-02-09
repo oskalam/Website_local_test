@@ -34,6 +34,7 @@ const ProcessSection = () => {
     },
   } as const;
   const t = content[language];
+  const steps = [{
     number: "01",
     icon: Search,
     title: t.step1Title,
