@@ -45,8 +45,8 @@ const DataParticlesBackground = () => {
         y: baseY,
         baseY,
         speed: minSpeed + Math.random() * (maxSpeed - minSpeed),
-        size: 4 + Math.random() * 6,
-        opacity: 0.3 + Math.random() * 0.4,
+        size: 2 + Math.random() * 4,
+        opacity: 0.08 + Math.random() * 0.12,
         waveOffset: Math.random() * Math.PI * 2,
         waveAmplitude: 30 + Math.random() * 50,
         waveFrequency: 0.001 + Math.random() * 0.002,
@@ -79,8 +79,8 @@ const DataParticlesBackground = () => {
         ctx.fill();
 
         // Add subtle glow
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = `rgba(44, 82, 129, ${particle.opacity * 0.5})`;
+        ctx.shadowBlur = 4;
+        ctx.shadowColor = `rgba(44, 82, 129, ${particle.opacity * 0.3})`;
         ctx.fill();
         ctx.shadowBlur = 0;
       });
@@ -102,7 +102,7 @@ const DataParticlesBackground = () => {
     <canvas
       ref={canvasRef}
       className="absolute inset-0 pointer-events-none"
-      style={{ opacity: 0.6 }}
+      style={{ opacity: 0.25 }}
     />
   );
 };
