@@ -1,7 +1,22 @@
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
+import { useLanguage } from "@/context/LanguageContext";
 
 const NotFound = () => {
+  const { language } = useLanguage();
+  const content = {
+    en: {
+      title: "404",
+      message: "Oops! Page not found",
+      link: "Return to Home",
+    },
+    fi: {
+      title: "404",
+      message: "Oops! Sivua ei l\u00f6ydy",
+      link: "Palaa kotisivulle",
+    },
+  } as const;
+  const t = content[language];
   const location = useLocation();
 
   useEffect(() => {
@@ -11,10 +26,10 @@ const NotFound = () => {
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted">
       <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">404</h1>
-        <p className="mb-4 text-xl text-muted-foreground">Oops! Page not found</p>
+        <h1 className="mb-4 text-4xl font-bold">{t.title}</h1>
+        <p className="mb-4 text-xl text-muted-foreground">{t.message}</p>
         <a href="/" className="text-primary underline hover:text-primary/90">
-          Return to Home
+          {t.link}
         </a>
       </div>
     </div>

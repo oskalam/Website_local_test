@@ -1,4 +1,18 @@
+import { useLanguage } from "@/context/LanguageContext";
+
 const Footer = () => {
+  const { language } = useLanguage();
+  const content = {
+    en: {
+      company: "Querit Oy",
+      copyright: "All rights reserved.",
+    },
+    fi: {
+      company: "Querit Oy",
+      copyright: "Kaikki oikeudet pidätetään.",
+    },
+  } as const;
+  const t = content[language];
   const currentYear = new Date().getFullYear();
 
   return (
@@ -18,7 +32,7 @@ const Footer = () => {
             </div>
           </div>
           <p className="text-sm text-muted-foreground">
-            © {currentYear} Querit. All rights reserved.
+            \u00a9 {currentYear} Querit. {t.copyright}
           </p>
         </div>
       </div>

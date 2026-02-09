@@ -1,22 +1,49 @@
 import { useState, useCallback, useEffect } from "react";
+import { useLanguage } from "@/context/LanguageContext";
 
-const carouselItems = [
-    {
-        image: "https://via.placeholder.com/400x200?text=Project+1",
-        title: "AI Booking Agent",
-        story: "Intelligent voice agent that handles phone calls 24/7, automatically answers customer FAQs, processes bookings and reservations, and sends personalized reminders via WhatsApp, email, and SMS. Try this concept out by scrolling down to the page!",
+const Carousel: React.FC = () => {
+  const { language } = useLanguage();
+  const content = {
+    en: {
+      project1Title: "AI Booking Agent",
+      project1Story: "Intelligent voice agent that handles phone calls 24/7, automatically answers customer FAQs, processes bookings and reservations, and sends personalized reminders via WhatsApp, email, and SMS. Try this concept out by scrolling down to the page!",
+      project2Title: "RFP Intelligence Platform",
+      project2Story: "Transform unstructured RFP documents into searchable knowledge vectors. AI agents can instantly query requirements, specifications, and compliance criteria across thousands of proposals.",
+      project3Title: "Call Intelligence Analytics",
+      project3Story: "Transform customer service calls into actionable business intelligence. AI-powered analysis extracts key entities, and decision patterns from conversations, turning lengthy support interactions into structured data for strategic decision making.",
+      prevButton: "\u2190 Previous",
+      nextButton: "Next \u2192",
     },
-    {
-        image: "https://via.placeholder.com/400x200?text=Project+2",
-        title: "RFP Intelligence Platform",
-        story: "Transform unstructured RFP documents into searchable knowledge vectors. AI agents can instantly query requirements, specifications, and compliance criteria across thousands of proposals.",
+    fi: {
+      project1Title: "AI-varausvirkailija",
+      project1Story: "Älykkkä puhelinagentit, joka käsittele puhelu 24/7, vastaa automaattisesti asiakkaiden UKK-kysymyksiin, käsittele varauksista ja varauksista, ja lähetä personoituja muistutuksia WhatsAppin, sähköpostin ja SMS-viestien kautta. Kokeile tätä konseptia vierittelemällä sivua alas!",
+      project2Title: "RFP-tiedustelualusta",
+      project2Story: "Muunna järjestämättömät RFP-asiakirjat haettaviksi tietovektoreiksi. AI-agentit voivat vetää hetkessä vaatimuksia, spesifikaatioita ja compliance-kriteerejä tuhansien ehdotusten joukosta.",
+      project3Title: "Puhelun tietoanalyytiikka",
+      project3Story: "Muunna asiakaspalvelupuhelut toimeenpantavaksi liiketoimintatiedoksi. AI-analyysi poimii keskusteluista lähinnä hakemisen mukaisen tiedon ja päätös merkinnät, jotka muuntavat pitkät tukiyhteydet järjesttyneiksi tiedoiksi strategisella päätöksentekijäksi.",
+      prevButton: "\u2190 Edellinen",
+      nextButton: "Seuraava \u2192",
     },
-    {
-        image: "https://via.placeholder.com/400x200?text=Project+3",
-        title: "Call Intelligence Analytics",
-        story: "Transform customer service calls into actionable business intelligence. AI-powered analysis extracts key entities, and decision patterns from conversations, turning lengthy support interactions into structured data for strategic decision making.",
-    },
-];
+  } as const;
+  const t = content[language];
+
+  const carouselItems = [
+      {
+          image: "https://via.placeholder.com/400x200?text=Project+1",
+          title: t.project1Title,
+          story: t.project1Story,
+      },
+      {
+          image: "https://via.placeholder.com/400x200?text=Project+2",
+          title: t.project2Title,
+          story: t.project2Story,
+      },
+      {
+          image: "https://via.placeholder.com/400x200?text=Project+3",
+          title: t.project3Title,
+          story: t.project3Story,
+      },
+  ];
 
 const mainColor = "#2c5281";
 
@@ -35,6 +62,48 @@ const getItemStyle = (index: number, current: number, length: number) => {
 };
 
 const Carousel: React.FC = () => {
+    const { language } = useLanguage();
+    const content = {
+      en: {
+        project1Title: "AI Booking Agent",
+        project1Story: "Intelligent voice agent that handles phone calls 24/7, automatically answers customer FAQs, processes bookings and reservations, and sends personalized reminders via WhatsApp, email, and SMS. Try this concept out by scrolling down to the page!",
+        project2Title: "RFP Intelligence Platform",
+        project2Story: "Transform unstructured RFP documents into searchable knowledge vectors. AI agents can instantly query requirements, specifications, and compliance criteria across thousands of proposals.",
+        project3Title: "Call Intelligence Analytics",
+        project3Story: "Transform customer service calls into actionable business intelligence. AI-powered analysis extracts key entities, and decision patterns from conversations, turning lengthy support interactions into structured data for strategic decision making.",
+        prevButton: "\u2190 Previous",
+        nextButton: "Next \u2192",
+      },
+      fi: {
+        project1Title: "AI-varausvirkailija",
+        project1Story: "Älykkkä puhelinagentit, joka käsittele puhelu 24/7, vastaa automaattisesti asiakkaiden UKK-kysymyksiin, käsittele varauksista ja varauksista, ja lähetä personoituja muistutuksia WhatsAppin, sähköpostin ja SMS-viestien kautta. Kokeile tätä konseptia vierittelemällä sivua alas!",
+        project2Title: "RFP-tiedustelualusta",
+        project2Story: "Muunna järjestämättömät RFP-asiakirjat haettaviksi tietovektoreiksi. AI-agentit voivat vetää hetkessä vaatimuksia, spesifikaatioita ja compliance-kriteerejä tuhansien ehdotusten joukosta.",
+        project3Title: "Puhelun tietoanalyytiikka",
+        project3Story: "Muunna asiakaspalvelupuhelut toimeenpantavaksi liiketoimintatiedoksi. AI-analyysi poimii keskusteluista lähinnä hakemisen mukaisen tiedon ja päätös merkinnät, jotka muuntavat pitkät tukiyhteydet järjesttyneiksi tiedoiksi strategisella päätöksentekijäksi.",
+        prevButton: "\u2190 Edellinen",
+        nextButton: "Seuraava \u2192",
+      },
+    } as const;
+    const t = content[language];
+
+    const carouselItems = [
+        {
+            image: "https://via.placeholder.com/400x200?text=Project+1",
+            title: t.project1Title,
+            story: t.project1Story,
+        },
+        {
+            image: "https://via.placeholder.com/400x200?text=Project+2",
+            title: t.project2Title,
+            story: t.project2Story,
+        },
+        {
+            image: "https://via.placeholder.com/400x200?text=Project+3",
+            title: t.project3Title,
+            story: t.project3Story,
+        },
+    ];
     const [current, setCurrent] = useState(0);
     const length = carouselItems.length;
 
@@ -98,7 +167,7 @@ const Carousel: React.FC = () => {
                     onClick={prev}
                     aria-label="Previous"
                 >
-                    &#8592; Previous
+                    {t.prevButton}
                 </button>
                 <button
                     className="px-6 py-2 rounded-lg text-white hover:brightness-110 transition-colors shadow-md"
@@ -106,7 +175,7 @@ const Carousel: React.FC = () => {
                     onClick={next}
                     aria-label="Next"
                 >
-                    Next &#8594;
+                    {t.nextButton}
                 </button>
             </div>
 

@@ -1,6 +1,27 @@
 import { Linkedin } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 const AboutSection = () => {
+  const { language } = useLanguage();
+  const content = {
+    en: {
+      aboutLabel: "About Us",
+      whoWeAreTitle: "Who We Are",
+      description1: "Querit is a Finland-based consulting company with deep expertise in business processes, systems, and technology.",
+      description2: "We use AI where it creates real value – not because it's trendy. Our approach is technology-agnostic: we recommend what actually solves your problem, whether that's AI, a simple process change, or something in between.",
+      description3: "Our focus is on building solutions that last, work in practice, and support your business over time.",
+      foundersTitle: "Our Founders",
+    },
+    fi: {
+      aboutLabel: "Tietoa meistä",
+      whoWeAreTitle: "Keitä me olemme",
+      description1: "Querit on suomalaisyritys, jolla on syvää asiantuntemusta liiketoimintaprosesseista, järjestelmistä ja teknologiasta.",
+      description2: "Käytämme tekoälyä siellä, missä se luo todellista arvoa – ei siksi, että se on trendikästä. Lähestymistapamme on teknologiariippumaton: suosittelemme sitä, joka todella ratkaisee ongelmasi, olipa se tekoäly, yksinkertainen prosessimuutos tai jotain näiden välillä.",
+      description3: "Painopiste on ratkaisujen rakentamisessa, jotka kestävät, toimivat käytännössä ja tukevat liiketoimintaasi ajan mittaan.",
+      foundersTitle: "Perustajamme",
+    },
+  } as const;
+  const t = content[language];
   const founders = [
     {
       name: "Oskari Alamäki",
@@ -22,24 +43,20 @@ const AboutSection = () => {
         {/* About Querit */}
         <div className="max-w-3xl mx-auto text-center mb-20">
           <span className="inline-block text-sm font-medium text-primary uppercase tracking-wider mb-4">
-            About Us
+            {t.aboutLabel}
           </span>
           <h2 className="text-3xl md:text-4xl font-semibold text-foreground mb-6 tracking-tight">
-            Who We Are
+            {t.whoWeAreTitle}
           </h2>
           <div className="space-y-5 text-muted-foreground text-lg leading-relaxed">
             <p>
-              Querit is a Finland-based consulting company with deep expertise in business 
-              processes, systems, and technology.
+              {t.description1}
             </p>
             <p>
-              We use AI where it creates real value – not because it's trendy. Our approach 
-              is technology-agnostic: we recommend what actually solves your problem, whether 
-              that's AI, a simple process change, or something in between.
+              {t.description2}
             </p>
             <p>
-              Our focus is on building solutions that last, work in practice, and support 
-              your business over time.
+              {t.description3}
             </p>
           </div>
         </div>
@@ -47,7 +64,7 @@ const AboutSection = () => {
         {/* Founders */}
         <div className="max-w-4xl mx-auto">
           <h3 className="text-2xl font-semibold text-foreground text-center mb-12 tracking-tight">
-            Our Founders
+            {t.foundersTitle}
           </h3>
           <div className="grid md:grid-cols-2 gap-8">
             {founders.map((founder, index) => (

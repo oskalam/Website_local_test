@@ -1,34 +1,67 @@
 import { Search, BarChart3, BookOpen, CheckCircle2, Lightbulb } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
+
 const ProcessSection = () => {
-  const steps = [{
+  const { language } = useLanguage();
+  const content = {
+    en: {
+      approachLabel: "Our Approach",
+      processTitle: "How We Work",
+      step1Title: "We start with your problem, not our solutions",
+      step1Desc: "Every project begins with understanding your actual business challenge and current processes.",
+      step2Title: "We evaluate by business value",
+      step2Desc: "Solutions are judged by whether they solve your problem, not by technical sophistication.",
+      step3Title: "We educate, not just implement",
+      step3Desc: "You'll understand the choices we make and why, so you can maintain and evolve the solution.",
+      step4Title: "We measure success honestly",
+      step4Desc: "After implementation, we ask: Did this solve the original problem?",
+      exampleTitle: "Concrete Example",
+      exampleText: "We might recommend improving an existing workflow over implementing a complex AI system – if that actually solves your problem better.",
+    },
+    fi: {
+      approachLabel: "Lähestymistapamme",
+      processTitle: "Kuinka toimimme",
+      step1Title: "Aloitamme sinun ongelmastasi, ei omista ratkaisuistamme",
+      step1Desc: "Jokainen projekti alkaa todellisen liiketoimintahaasteen ja nykyisten prosessien ymmärtämisestä.",
+      step2Title: "Arvioimme liiketoiminnallisen arvon perusteella",
+      step2Desc: "Ratkaisuja arvioidaan sen perusteella, ratkaistavatko ne ongelmasi, ei teknisen kehittyneisyyden perusteella.",
+      step3Title: "Koulutamme, emme vain toteuta",
+      step3Desc: "Ymmärrät valinnat, joita teemme, ja miksi, joten voit ylläpitää ja kehittää ratkaisua.",
+      step4Title: "Mittaamme menestystä rehellisesti",
+      step4Desc: "Toteutuksen jälkeen kyselemme: Ratkaisiko tämä alkuperäisen ongelman?",
+      exampleTitle: "Käytännön esimerkki",
+      exampleText: "Voisimme suositella olemassa olevan työnkulun parantamista monimutkaisen AI-järjestelmän toteuttamisen sijaan, jos se ratkaisee ongelmasi paremmin.",
+    },
+  } as const;
+  const t = content[language];
     number: "01",
     icon: Search,
-    title: "We start with your problem, not our solutions",
-    description: "Every project begins with understanding your actual business challenge and current processes."
+    title: t.step1Title,
+    description: t.step1Desc,
   }, {
     number: "02",
     icon: BarChart3,
-    title: "We evaluate by business value",
-    description: "Solutions are judged by whether they solve your problem, not by technical sophistication."
+    title: t.step2Title,
+    description: t.step2Desc,
   }, {
     number: "03",
     icon: BookOpen,
-    title: "We educate, not just implement",
-    description: "You'll understand the choices we make and why, so you can maintain and evolve the solution."
+    title: t.step3Title,
+    description: t.step3Desc,
   }, {
     number: "04",
     icon: CheckCircle2,
-    title: "We measure success honestly",
-    description: "After implementation, we ask: Did this solve the original problem?"
+    title: t.step4Title,
+    description: t.step4Desc,
   }];
   return <section id="process" className="section-padding">
       <div className="section-container">
         <div className="text-center mb-16">
           <span className="inline-block text-sm font-medium text-primary uppercase tracking-wider mb-4">
-            Our Approach
+            {t.approachLabel}
           </span>
           <h2 className="text-3xl md:text-4xl font-semibold text-foreground tracking-tight">
-            How We Work
+            {t.processTitle}
           </h2>
         </div>
 
@@ -71,9 +104,9 @@ const ProcessSection = () => {
               </div>
               <div>
                 <h4 className="text-sm font-semibold text-foreground uppercase tracking-wide mb-2">
-                  Concrete Example
+                  {t.exampleTitle}
                 </h4>
-                <p className="text-muted-foreground italic leading-relaxed">"We might recommend improving an existing workflow over implementing a complex AI system – if that actually solves your problem better."</p>
+                <p className="text-muted-foreground italic leading-relaxed">"{t.exampleText}"</p>
               </div>
             </div>
           </div>

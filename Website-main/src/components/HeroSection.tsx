@@ -1,7 +1,37 @@
 import { Button } from "@/components/ui/button";
 import { ArrowDown } from "lucide-react";
 import DataParticlesBackground from "@/components/DataParticlesBackground";
+import { useLanguage } from "@/context/LanguageContext";
 const HeroSection = () => {
+  const { language } = useLanguage();
+  const content = {
+    en: {
+      title: {
+        prefix: "Process consulting with",
+        tech: "technology",
+        and: "and",
+        ai: "AI expertise",
+      },
+      subtitle:
+        "We help companies solve real business problems – sustainably and responsibly. Technology is our tool, not our product.",
+      ctaPrimary: "Let's talk",
+      ctaSecondary: "Learn more",
+    },
+    fi: {
+      title: {
+        prefix: "Prosessikonsultointi",
+        tech: "teknologian",
+        and: "ja",
+        ai: "AI-osaamisen avulla",
+      },
+      subtitle:
+        "Autamme yrityksiä ratkaisemaan todellisia liiketoimintaongelmia – kestävästi ja vastuullisesti. Teknologia on työkalumme, ei tuotteemme.",
+      ctaPrimary: "Keskustellaan",
+      ctaSecondary: "Lue lisää",
+    },
+  } as const;
+
+  const t = content[language];
   const scrollToContact = () => {
     const element = document.querySelector("#contact");
     if (element) {
@@ -40,24 +70,23 @@ const HeroSection = () => {
 
           {/* Main headline */}
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-foreground leading-tight tracking-tight mb-6 opacity-0 animate-fade-up stagger-1 text-balance">
-            Process consulting with{" "}
-            <span className="text-primary">technology</span> and{" "}
-            <span className="text-primary">AI expertise</span>
+            {t.title.prefix}{" "}
+            <span className="text-primary">{t.title.tech}</span> {t.title.and}{" "}
+            <span className="text-primary">{t.title.ai}</span>
           </h1>
 
           {/* Subheading */}
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 opacity-0 animate-fade-up stagger-2 text-balance leading-relaxed">
-            We help companies solve real business problems – sustainably and responsibly. 
-            Technology is our tool, not our product.
+            {t.subtitle}
           </p>
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 opacity-0 animate-fade-up stagger-3">
             <Button variant="hero" size="lg" onClick={scrollToContact}>
-              Let's talk
+              {t.ctaPrimary}
             </Button>
             <Button variant="outline" size="lg" onClick={scrollToAbout}>
-              Learn more
+              {t.ctaSecondary}
             </Button>
           </div>
         </div>

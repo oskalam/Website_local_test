@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { language, setLanguage } = useLanguage();
   
   const throttledHandleScroll = useCallback(() => {
     let ticking = false;
@@ -26,22 +28,32 @@ const Navigation = () => {
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, [throttledHandleScroll]);
-  const navLinks = [{
-    href: "#about",
-    label: "About"
-  }, {
-    href: "#mission",
-    label: "Mission"
-  }, {
-    href: "#values",
-    label: "Values"
-  }, {
-    href: "#process",
-    label: "How we work"
-  }, {
-    href: "#references",
-    label: "References"
-  }];
+  
+  const navContent = {
+    en: {
+      links: [
+        { href: "#about", label: "About" },
+        { href: "#mission", label: "Mission" },
+        { href: "#values", label: "Values" },
+        { href: "#process", label: "How we work" },
+        { href: "#references", label: "References" },
+      ],
+      cta: "Let's Talk",
+    },
+    fi: {
+      links: [
+        { href: "#about", label: "Meistä" },
+        { href: "#mission", label: "Missio" },
+        { href: "#values", label: "Arvot" },
+        { href: "#process", label: "Miten toimimme" },
+        { href: "#references", label: "Referenssit" },
+      ],
+      cta: "Keskustellaan",
+    },
+  } as const;
+
+  const navLinks = navContent[language].links;
+  const ctaLabel = navContent[language].cta;
   const scrollToSection = (href: string) => {
     const element = document.querySelector(href);
     if (element) {
@@ -78,8 +90,25 @@ const Navigation = () => {
             {navLinks.map(link => <button key={link.href} onClick={() => scrollToSection(link.href)} className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-200">
                 {link.label}
               </button>)}
+            <div className="flex items-center gap-2 text-xs font-semibold">
+              <button
+                onClick={() => setLanguage("fi")}
+                className={language === "fi" ? "text-foreground" : "text-muted-foreground hover:text-foreground"}
+                aria-label="Switch to Finnish"
+              >
+                FI
+              </button>
+              <span className="text-muted-foreground/40">/</span>
+              <button
+                onClick={() => setLanguage("en")}
+                className={language === "en" ? "text-foreground" : "text-muted-foreground hover:text-foreground"}
+                aria-label="Switch to English"
+              >
+                EN
+              </button>
+            </div>
             <Button variant="hero" size="sm" onClick={() => scrollToSection("#contact")} className="ml-2">
-              Let's Talk
+              {ctaLabel}
             </Button>
           </div>
 
@@ -95,8 +124,23 @@ const Navigation = () => {
               {navLinks.map(link => <button key={link.href} onClick={() => scrollToSection(link.href)} className="py-3 text-left text-muted-foreground hover:text-foreground transition-colors">
                   {link.label}
                 </button>)}
+              <div className="flex items-center gap-3 py-3 text-sm font-semibold">
+                <button
+                  onClick={() => setLanguage("fi")}
+                  className={language === "fi" ? "text-foreground" : "text-muted-foreground hover:text-foreground"}
+                >
+                  FI
+                </button>
+                <span className="text-muted-foreground/40">/</span>
+                <button
+                  onClick={() => setLanguage("en")}
+                  className={language === "en" ? "text-foreground" : "text-muted-foreground hover:text-foreground"}
+                >
+                  EN
+                </button>
+              </div>
               <Button variant="hero" className="mt-4" onClick={() => scrollToSection("#contact")}>
-                Let's talk
+                {ctaLabel}
               </Button>
             </div>
           </div>}
