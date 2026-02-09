@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
 type Language = "en" | "fi";
 
@@ -11,10 +11,30 @@ const LanguageContext = createContext<LanguageContextType | undefined>(
   undefined
 );
 
+const getInitialLanguage = (): Language => {
+  // Check localStorage first
+  const saved = localStorage.getItem("querit-language");
+  if (saved === "en" || saved === "fi") {
+    return saved;
+  }
+  
+  // Check browser language
+  const browserLang = navigator.language.toLowerCase();
+  if (browserLang.startsWith("fi")) {
+    return "fi";
+  }
+  
+  return "en";
+};
+
 export const LanguageProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const [language, setLanguage] = useState<Language>("en");
+  const [language, setLanguage] = useState<Language>(getInitialLanguage);
+
+  useEffect(() => {
+    localStorage.setItem("querit-language", language);
+  }, [language]);
 
   return (
     <LanguageContext.Provider value={{ language, setLanguage }}>
