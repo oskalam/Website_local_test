@@ -1,50 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 
-const Carousel: React.FC = () => {
-  const { language } = useLanguage();
-  const content = {
-    en: {
-      project1Title: "AI Booking Agent",
-      project1Story: "Intelligent voice agent that handles phone calls 24/7, automatically answers customer FAQs, processes bookings and reservations, and sends personalized reminders via WhatsApp, email, and SMS. Try this concept out by scrolling down to the page!",
-      project2Title: "RFP Intelligence Platform",
-      project2Story: "Transform unstructured RFP documents into searchable knowledge vectors. AI agents can instantly query requirements, specifications, and compliance criteria across thousands of proposals.",
-      project3Title: "Call Intelligence Analytics",
-      project3Story: "Transform customer service calls into actionable business intelligence. AI-powered analysis extracts key entities, and decision patterns from conversations, turning lengthy support interactions into structured data for strategic decision making.",
-      prevButton: "\u2190 Previous",
-      nextButton: "Next \u2192",
-    },
-    fi: {
-      project1Title: "AI-varausvirkailija",
-      project1Story: "Älykkkä puhelinagentit, joka käsittele puhelu 24/7, vastaa automaattisesti asiakkaiden UKK-kysymyksiin, käsittele varauksista ja varauksista, ja lähetä personoituja muistutuksia WhatsAppin, sähköpostin ja SMS-viestien kautta. Kokeile tätä konseptia vierittelemällä sivua alas!",
-      project2Title: "RFP-tiedustelualusta",
-      project2Story: "Muunna järjestämättömät RFP-asiakirjat haettaviksi tietovektoreiksi. AI-agentit voivat vetää hetkessä vaatimuksia, spesifikaatioita ja compliance-kriteerejä tuhansien ehdotusten joukosta.",
-      project3Title: "Puhelun tietoanalyytiikka",
-      project3Story: "Muunna asiakaspalvelupuhelut toimeenpantavaksi liiketoimintatiedoksi. AI-analyysi poimii keskusteluista lähinnä hakemisen mukaisen tiedon ja päätös merkinnät, jotka muuntavat pitkät tukiyhteydet järjesttyneiksi tiedoiksi strategisella päätöksentekijäksi.",
-      prevButton: "\u2190 Edellinen",
-      nextButton: "Seuraava \u2192",
-    },
-  } as const;
-  const t = content[language];
-
-  const carouselItems = [
-      {
-          image: "https://via.placeholder.com/400x200?text=Project+1",
-          title: t.project1Title,
-          story: t.project1Story,
-      },
-      {
-          image: "https://via.placeholder.com/400x200?text=Project+2",
-          title: t.project2Title,
-          story: t.project2Story,
-      },
-      {
-          image: "https://via.placeholder.com/400x200?text=Project+3",
-          title: t.project3Title,
-          story: t.project3Story,
-      },
-  ];
-
 const mainColor = "#2c5281";
 
 const getItemStyle = (index: number, current: number, length: number) => {
@@ -71,18 +27,18 @@ const Carousel: React.FC = () => {
         project2Story: "Transform unstructured RFP documents into searchable knowledge vectors. AI agents can instantly query requirements, specifications, and compliance criteria across thousands of proposals.",
         project3Title: "Call Intelligence Analytics",
         project3Story: "Transform customer service calls into actionable business intelligence. AI-powered analysis extracts key entities, and decision patterns from conversations, turning lengthy support interactions into structured data for strategic decision making.",
-        prevButton: "\u2190 Previous",
-        nextButton: "Next \u2192",
+        prevButton: "← Previous",
+        nextButton: "Next →",
       },
       fi: {
         project1Title: "AI-varausvirkailija",
-        project1Story: "Älykkkä puhelinagentit, joka käsittele puhelu 24/7, vastaa automaattisesti asiakkaiden UKK-kysymyksiin, käsittele varauksista ja varauksista, ja lähetä personoituja muistutuksia WhatsAppin, sähköpostin ja SMS-viestien kautta. Kokeile tätä konseptia vierittelemällä sivua alas!",
+        project1Story: "Älykkkä puhelin agentti, joka käsittelee puheluita 24/7, vastaa automaattisesti asiakkaiden UKK:ihin, käsittelee varauksia ja lähetää personoituja muistutuksia WhatsAppin, sähköpostin ja SMS:n kautta. Kokeile tätä konseptia vierittämällä sivua alas!",
         project2Title: "RFP-tiedustelualusta",
-        project2Story: "Muunna järjestämättömät RFP-asiakirjat haettaviksi tietovektoreiksi. AI-agentit voivat vetää hetkessä vaatimuksia, spesifikaatioita ja compliance-kriteerejä tuhansien ehdotusten joukosta.",
-        project3Title: "Puhelun tietoanalyytiikka",
-        project3Story: "Muunna asiakaspalvelupuhelut toimeenpantavaksi liiketoimintatiedoksi. AI-analyysi poimii keskusteluista lähinnä hakemisen mukaisen tiedon ja päätös merkinnät, jotka muuntavat pitkät tukiyhteydet järjesttyneiksi tiedoiksi strategisella päätöksentekijäksi.",
-        prevButton: "\u2190 Edellinen",
-        nextButton: "Seuraava \u2192",
+        project2Story: "Muunna jäsentymättömät RFP-asiakirjat haettaviksi tietovektoreiksi. AI-agentit voivat hetkessä kysyä vaatimuksista, spesifikaatioista ja vaatimustenmukaisuudesta tuhansien ehdotusten joukosta.",
+        project3Title: "Puhelun älyanalytiikka",
+        project3Story: "Muunna asiakaspalvelupuhelut toimeenpantavaksi liiketoimintatiedoksi. AI-pohjainen analyysi poimii keskusteluista keskeisiä entiteettejä ja päätöskuvioita, jotka muuntavat pitkät tukiyhteydet rakenteiseksi dataksi strategiselle päätöksenteolle.",
+        prevButton: "← Edellinen",
+        nextButton: "Seuraava →",
       },
     } as const;
     const t = content[language];
