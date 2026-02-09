@@ -32,7 +32,7 @@ const Footer = () => {
             </div>
           </div>
           <p className="text-sm text-muted-foreground">
-            \u00a9 {currentYear} Querit. {t.copyright}
+            © {currentYear} Querit. {t.copyright}
           </p>
         </div>
       </div>

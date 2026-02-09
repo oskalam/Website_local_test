@@ -12,7 +12,7 @@ const NotFound = () => {
     },
     fi: {
       title: "404",
-      message: "Oops! Sivua ei l\u00f6ydy",
+      message: "Oops! Sivua ei löydy",
       link: "Palaa kotisivulle",
     },
   } as const;

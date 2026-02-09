@@ -7,8 +7,8 @@ const ContactSection = () => {
     en: {
       touchLabel: "Get in Touch",
       talkTitle: "Let's Talk",
-      talkDesc: "Whether you're certain you need technology or just exploring options, we're happy to talk. No pressure, no sales pitch \u2013 just an honest conversation about whether we can help.",
-      agentTitle: "Oboarding Agent",
+      talkDesc: "Whether you're certain you need technology or just exploring options, we're happy to talk. No pressure, no sales pitch – just an honest conversation about whether we can help.",
+      agentTitle: "Onboarding Agent",
       agentSubtitle: "Your intelligent assistant for seamless onboarding",
       agentDesc: "Get started instantly with our AI-powered consultation agent. Simply describe your needs, and our intelligent assistant will guide you through a personalized discovery process.",
       step1Label: "STEP 1",
