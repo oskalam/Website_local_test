@@ -43,6 +43,7 @@ const CookieBanner = () => {
       rejectAll: "Reject",
       settings: "Preferences",
       save: "Save preferences",
+      back: "Back",
       learnMore: "Read cookie policy",
       necessary: "Essential",
       necessaryDesc: "Required for core site functionality.",
@@ -61,6 +62,7 @@ const CookieBanner = () => {
       rejectAll: "Hylkää",
       settings: "Valinnat",
       save: "Tallenna valinnat",
+      back: "Takaisin",
       learnMore: "Lue evästekäytäntö",
       necessary: "Välttämättömät",
       necessaryDesc: "Tarvitaan sivuston perustoimintoihin.",
@@ -94,7 +96,8 @@ const CookieBanner = () => {
 
   useEffect(() => {
     const handleOpenSettings = () => {
-      setIsVisible(true);
+      const saved = localStorage.getItem(CONSENT_KEY);
+      setIsVisible(!saved);
       setIsSettingsOpen(true);
     };
 
@@ -142,6 +145,10 @@ const CookieBanner = () => {
 
   const handleSave = () => {
     saveConsent(preferences, "custom");
+  };
+
+  const handleCloseSettings = () => {
+    setIsSettingsOpen(false);
   };
 
   const preferenceRows = useMemo(
@@ -238,8 +245,8 @@ const CookieBanner = () => {
             ))}
           </div>
           <DialogFooter>
-            <Button variant="outline" size="sm" onClick={handleRejectAll}>
-              {t.rejectAll}
+            <Button variant="outline" size="sm" onClick={handleCloseSettings}>
+              {t.back}
             </Button>
             <Button variant="default" size="sm" onClick={handleSave}>
               {t.save}
