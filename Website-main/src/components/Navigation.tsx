@@ -1,5 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Menu, X } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 const Navigation = () => {
@@ -63,6 +70,7 @@ const Navigation = () => {
     }
     setIsMobileMenuOpen(false);
   };
+  const languageLabel = language === "fi" ? "FI" : "EN";
   return <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? "bg-background/80 backdrop-blur-lg border-b border-border shadow-soft" : "bg-transparent"}`}>
       <div className="section-container">
         <div className="flex items-center justify-between h-16 lg:h-20">
@@ -90,23 +98,17 @@ const Navigation = () => {
             {navLinks.map(link => <button key={link.href} onClick={() => scrollToSection(link.href)} className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-200">
                 {link.label}
               </button>)}
-            <div className="flex items-center gap-2 text-xs font-semibold">
-              <button
-                onClick={() => setLanguage("fi")}
-                className={language === "fi" ? "text-foreground" : "text-muted-foreground hover:text-foreground"}
-                aria-label="Switch to Finnish"
-              >
-                FI
-              </button>
-              <span className="text-muted-foreground/40">/</span>
-              <button
-                onClick={() => setLanguage("en")}
-                className={language === "en" ? "text-foreground" : "text-muted-foreground hover:text-foreground"}
-                aria-label="Switch to English"
-              >
-                EN
-              </button>
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger className="text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors">
+                {languageLabel}
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuRadioGroup value={language} onValueChange={value => setLanguage(value as "en" | "fi")}>
+                  <DropdownMenuRadioItem value="fi">FI</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="en">EN</DropdownMenuRadioItem>
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button variant="hero" size="sm" onClick={() => scrollToSection("#contact")} className="ml-2">
               {ctaLabel}
             </Button>
@@ -124,20 +126,18 @@ const Navigation = () => {
               {navLinks.map(link => <button key={link.href} onClick={() => scrollToSection(link.href)} className="py-3 text-left text-muted-foreground hover:text-foreground transition-colors">
                   {link.label}
                 </button>)}
-              <div className="flex items-center gap-3 py-3 text-sm font-semibold">
-                <button
-                  onClick={() => setLanguage("fi")}
-                  className={language === "fi" ? "text-foreground" : "text-muted-foreground hover:text-foreground"}
-                >
-                  FI
-                </button>
-                <span className="text-muted-foreground/40">/</span>
-                <button
-                  onClick={() => setLanguage("en")}
-                  className={language === "en" ? "text-foreground" : "text-muted-foreground hover:text-foreground"}
-                >
-                  EN
-                </button>
+              <div className="py-3 text-sm font-semibold">
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="text-muted-foreground hover:text-foreground transition-colors">
+                    {languageLabel}
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start">
+                    <DropdownMenuRadioGroup value={language} onValueChange={value => setLanguage(value as "en" | "fi")}>
+                      <DropdownMenuRadioItem value="fi">FI</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="en">EN</DropdownMenuRadioItem>
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
               <Button variant="hero" className="mt-4" onClick={() => scrollToSection("#contact")}>
                 {ctaLabel}
