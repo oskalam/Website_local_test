@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/context/LanguageContext";
-import { Button } from "@/components/ui/button";
 
 const Footer = () => {
   const { language } = useLanguage();
@@ -24,7 +23,7 @@ const Footer = () => {
   return (
     <footer className="py-8 border-t border-border">
       <div className="section-container">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="flex flex-col items-center gap-4">
           <div className="flex flex-col md:flex-row items-center md:items-start gap-3">
             <img
               src="/querit-logo.svg"
@@ -37,17 +36,20 @@ const Footer = () => {
               <span className="text-sm font-semibold text-foreground">3594237-2</span>
             </div>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-2">
-            <Button variant="outline" size="sm" asChild>
-              <Link to="/privacy">{t.privacyLabel}</Link>
-            </Button>
-            <Button variant="outline" size="sm" asChild>
-              <Link to="/cookies">{t.cookiesLabel}</Link>
-            </Button>
+          <div className="flex flex-col items-center gap-2">
+            <p className="text-sm text-muted-foreground">
+              © {currentYear} Querit. {t.copyright}
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-3 text-sm text-muted-foreground">
+              <Link to="/privacy" className="hover:text-foreground transition-colors">
+                {t.privacyLabel}
+              </Link>
+              <span className="text-muted-foreground/50">•</span>
+              <Link to="/cookies" className="hover:text-foreground transition-colors">
+                {t.cookiesLabel}
+              </Link>
+            </div>
           </div>
-          <p className="text-sm text-muted-foreground">
-            © {currentYear} Querit. {t.copyright}
-          </p>
         </div>
       </div>
     </footer>
