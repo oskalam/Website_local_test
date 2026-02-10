@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "@/context/LanguageContext";
+import CookieBanner from "@/components/CookieBanner";
 import Index from "./pages/Index";
 import Privacy from "./pages/Privacy";
 import Cookies from "./pages/Cookies";
@@ -18,6 +19,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <CookieBanner />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/privacy" element={<Privacy />} />

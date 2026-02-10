@@ -9,12 +9,14 @@ const Footer = () => {
       copyright: "All rights reserved.",
       privacyLabel: "Privacy Statement",
       cookiesLabel: "Cookies",
+      cookiesManageLabel: "Cookie settings",
     },
     fi: {
       company: "Querit Oy",
       copyright: "Kaikki oikeudet pidätetään.",
       privacyLabel: "Tietoturvaseloste",
       cookiesLabel: "Evästeet",
+      cookiesManageLabel: "Evästeasetukset",
     },
   } as const;
   const t = content[language];
@@ -48,6 +50,14 @@ const Footer = () => {
               <Link to="/cookies" className="hover:text-foreground transition-colors">
                 {t.cookiesLabel}
               </Link>
+              <span className="text-muted-foreground/50">•</span>
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new Event("cookie-settings-open"))}
+                className="hover:text-foreground transition-colors"
+              >
+                {t.cookiesManageLabel}
+              </button>
             </div>
           </div>
         </div>
