@@ -7,14 +7,14 @@ const Footer = () => {
     en: {
       company: "Querit Oy",
       copyright: "All rights reserved.",
-      privacyLabel: "Privacy Statement",
+      privacyLabel: "Privacy Policy",
       cookiesLabel: "Cookies",
       cookiesManageLabel: "Cookie settings",
     },
     fi: {
       company: "Querit Oy",
       copyright: "Kaikki oikeudet pidätetään.",
-      privacyLabel: "Tietoturvaseloste",
+      privacyLabel: "Tietosuojaseloste",
       cookiesLabel: "Evästeet",
       cookiesManageLabel: "Evästeasetukset",
     },

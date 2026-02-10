@@ -7,12 +7,12 @@ const Privacy = () => {
   const content = {
     en: {
       title: "Privacy Statement",
-      body: "We are preparing our privacy statement. For questions, contact info@querit.com.",
+      body: "We are preparing our privacy policy. For questions, contact info@querit.com.",
       back: "Back to Home",
     },
     fi: {
-      title: "Tietoturvaseloste",
-      body: "Valmistelemme tietoturvaselostetta. Kysymyksissä: info@querit.com.",
+      title: "Tietosuojaseloste",
+      body: "Valmistelemme tietosuojaselostetta. Kysymyksissä: info@querit.com.",
       back: "Takaisin etusivulle",
     },
   } as const;
