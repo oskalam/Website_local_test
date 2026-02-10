@@ -26,10 +26,10 @@ const Cookies = () => {
             <img
               src="/querit-logo.svg"
               alt="Querit logo"
-              className="h-10 w-10"
+              className="h-10 w-10 md:h-12 md:w-12"
               loading="lazy"
             />
-            <span className="text-lg font-semibold text-foreground">Querit</span>
+            <span className="text-3xl font-semibold text-foreground tracking-tight">Querit</span>
           </div>
           <h1 className="text-3xl md:text-4xl font-semibold text-foreground mb-4">
             {t.title}
