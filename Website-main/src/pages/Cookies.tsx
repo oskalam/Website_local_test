@@ -1,0 +1,38 @@
+import { useLanguage } from "@/context/LanguageContext";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+
+const Cookies = () => {
+  const { language } = useLanguage();
+  const content = {
+    en: {
+      title: "Cookies",
+      body: "Cookie policy content is coming soon. This page will describe the cookies we use and how you can manage them.",
+      back: "Back to Home",
+    },
+    fi: {
+      title: "Evästeet",
+      body: "Evästeiden käyttöä koskeva sisältö on tulossa. Tällä sivulla kerromme käyttämämme evästeet ja niiden hallinnan.",
+      back: "Takaisin etusivulle",
+    },
+  } as const;
+  const t = content[language];
+
+  return (
+    <main className="min-h-screen bg-background">
+      <div className="section-container py-16">
+        <div className="max-w-3xl">
+          <h1 className="text-3xl md:text-4xl font-semibold text-foreground mb-4">
+            {t.title}
+          </h1>
+          <p className="text-muted-foreground leading-relaxed mb-8">{t.body}</p>
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/">{t.back}</Link>
+          </Button>
+        </div>
+      </div>
+    </main>
+  );
+};
+
+export default Cookies;

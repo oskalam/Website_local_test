@@ -1,0 +1,38 @@
+import { useLanguage } from "@/context/LanguageContext";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+
+const Privacy = () => {
+  const { language } = useLanguage();
+  const content = {
+    en: {
+      title: "Privacy Statement",
+      body: "We are preparing our privacy statement. For questions, contact info@querit.com.",
+      back: "Back to Home",
+    },
+    fi: {
+      title: "Tietoturvaseloste",
+      body: "Valmistelemme tietoturvaselostetta. Kysymyksissä: info@querit.com.",
+      back: "Takaisin etusivulle",
+    },
+  } as const;
+  const t = content[language];
+
+  return (
+    <main className="min-h-screen bg-background">
+      <div className="section-container py-16">
+        <div className="max-w-3xl">
+          <h1 className="text-3xl md:text-4xl font-semibold text-foreground mb-4">
+            {t.title}
+          </h1>
+          <p className="text-muted-foreground leading-relaxed mb-8">{t.body}</p>
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/">{t.back}</Link>
+          </Button>
+        </div>
+      </div>
+    </main>
+  );
+};
+
+export default Privacy;

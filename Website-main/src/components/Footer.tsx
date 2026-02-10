@@ -1,4 +1,6 @@
+import { Link } from "react-router-dom";
 import { useLanguage } from "@/context/LanguageContext";
+import { Button } from "@/components/ui/button";
 
 const Footer = () => {
   const { language } = useLanguage();
@@ -6,10 +8,14 @@ const Footer = () => {
     en: {
       company: "Querit Oy",
       copyright: "All rights reserved.",
+      privacyLabel: "Privacy Statement",
+      cookiesLabel: "Cookies",
     },
     fi: {
       company: "Querit Oy",
       copyright: "Kaikki oikeudet pidätetään.",
+      privacyLabel: "Tietoturvaseloste",
+      cookiesLabel: "Evästeet",
     },
   } as const;
   const t = content[language];
@@ -30,6 +36,14 @@ const Footer = () => {
               <span className="text-lg font-bold text-foreground">Querit Oy</span>
               <span className="text-sm font-semibold text-foreground">3594237-2</span>
             </div>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/privacy">{t.privacyLabel}</Link>
+            </Button>
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/cookies">{t.cookiesLabel}</Link>
+            </Button>
           </div>
           <p className="text-sm text-muted-foreground">
             © {currentYear} Querit. {t.copyright}
